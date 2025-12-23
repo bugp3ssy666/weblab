@@ -266,6 +266,14 @@ private:
             std::cout << "[!] 收到空的文件名，使用默认 output 文件名" << std::endl;
             output_file.open("output", std::ios::binary);
         }
+
+        // 发送FILE_NAME确认
+        Packet file_name_ack;
+        file_name_ack.header.type = FILE_NAME_ACK;
+        file_name_ack.header.ack_num = name_packet.header.seq_num + 1;
+        file_name_ack.header.checksum = file_name_ack.calculate_checksum();
+        send_packet(file_name_ack);
+        std::cout << "[✓] 已发送FILE_NAME确认" << std::endl;
     }
 
     void send_ack() {

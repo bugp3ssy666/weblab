@@ -25,7 +25,8 @@ enum PacketType : uint8_t {
     ACK = 0x04,
     FIN = 0x05,
     FIN_ACK = 0x06,
-    FILE_NAME = 0x07
+    FILE_NAME = 0x07,
+    FILE_NAME_ACK = 0x08
 };
 
 // 协议数据包头部结构

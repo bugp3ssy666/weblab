@@ -49,6 +49,8 @@ private:
     bool server_locked;
     sockaddr_in server_addr;
 
+    uint32_t receiver_window;
+
 public:
     Sender(const char* sender_ip, uint16_t sender_port,
            const char* receiver_ip, uint16_t receiver_port) {
@@ -104,6 +106,41 @@ public:
 
     void send_control_packet(const Packet& packet) {
         send_packet(packet);
+    }
+
+    bool wait_for_file_name_ack(const Packet& file_name_pkt) {
+        std::cout << "正在等待文件名确认..." << std::endl;
+        auto send_time = std::chrono::steady_clock::now();
+        int retries = 0;
+
+        while (true) {
+            auto now = std::chrono::steady_clock::now();
+
+            if (retries >= 5) {
+                std::cerr << "[✗] 文件名确认超时（已重试" << retries << "次）" << std::endl;
+                return false;
+            }
+
+            auto elapsed = std::chrono::duration_cast<std::chrono::milliseconds>(
+                now - send_time).count();
+            if (elapsed > TIMEOUT_MS && retries < 5) {
+                std::cout << "文件名确认超时，进行第" << (retries + 1) << "次重传" << std::endl;
+                send_packet(file_name_pkt);  // 实际重传FILE_NAME包
+                retries++;
+                send_time = now;
+            }
+
+            Packet ack_packet;
+            sockaddr_in from;
+            if (receive_packet(ack_packet, from)) {
+                if (ack_packet.header.type == FILE_NAME_ACK && ack_packet.verify_checksum()) {
+                    std::cout << "[✓] 收到文件名确认，开始传输数据" << std::endl;
+                    return true;
+                }
+            }
+
+            Sleep(10);
+        }
     }
 
     ~Sender() {
@@ -479,6 +516,11 @@ int main(int argc, char* argv[]) {
     }
     name_pkt.header.checksum = name_pkt.calculate_checksum();
     sender.send_control_packet(name_pkt);
+
+    if (!sender.wait_for_file_name_ack(name_pkt)) {
+        std::cerr << "[✗] 文件名确认失败，程序退出" << std::endl;
+        return 1;
+    }
 
     if (!sender.send_file(filename.c_str())) {
         std::cerr << "[✗] 发送文件失败" << std::endl;
