@@ -15,13 +15,16 @@
 ```
 .
 ├── protocol.h          # 协议头文件和数据结构定义
-├── sender.cpp          # 发送端实现
-├── receiver.cpp        # 接收端实现
-├── Makefile           # Makefile编译脚本（MinGW）
-├── build.bat          # Windows批处理编译脚本
-├── clean.bat          # 清理脚本
-├── CMakeLists.txt     # CMake配置文件（可选）
-└── README.md          # 本文件
+├── sender.cpp          # 发送端/客户端实现
+├── receiver.cpp        # 接收端/服务端实现
+├── Makefile            # Makefile编译脚本（MinGW）
+|
+├── sender.exe          # 发送端/客户端可执行程序
+├── receiver.exe        # 接收端/服务端可执行程序
+├── Router.exe          # 实验本身提供的路由器模拟程序
+├── *.jpg / *.txt       # 测试文件
+|
+└── README.md           # 本文件
 ```
 
 ## 环境要求
@@ -123,61 +126,41 @@ cmake --build . --config Release
 
 ## 使用方法
 
-### 基本使用
+### 本地直连
 
 **步骤1：启动接收端**
 
-打开第一个命令提示符窗口:
-```cmd
-receiver.exe 8888 output.txt
-```
+运行 `receiver.exe`，在 cmd 界面配制好服务器的 IP 地址和端口。
 
 **步骤2：启动发送端**
 
-打开第二个命令提示符窗口:
-```cmd
-sender.exe 127.0.0.1 8888 input.txt
-```
+运行 `sender.exe`，在 cmd 界面输入客户端 IP 地址和端口。注意，接收端 IP 地址和端口与 `receiver.exe` 中填写的保持一致。
 
-### 本地测试示例
+**步骤3：输入文件目录**
 
-```cmd
-# 命令提示符窗口1
-receiver.exe 8888 received_image.jpg
+在 `sender.exe` 中输入文件的绝对或相对目录（需要包含完整的文件名），回车确认即可开始文件传输。
 
-# 命令提示符窗口2
-sender.exe 127.0.0.1 8888 test_image.jpg
-```
+### Router模拟连接
 
-### 局域网测试示例
+**步骤1：启动模拟路由器**
 
-假设接收端机器IP为192.168.1.100：
+运行 `Router.exe`，在图形化界面中分别配置路由器的 IP 地址和端口、接收端的 IP 地址和端口。设置初始的丢包率和延迟大小参数。
 
-```cmd
-# 接收端机器
-receiver.exe 8888 received_file.pdf
+**步骤2：启动接收端**
 
-# 发送端机器
-sender.exe 192.168.1.100 8888 document.pdf
-```
+运行 `receiver.exe`，在 cmd 界面输入服务器的 IP 地址和端口，注意，要与路由器中填写的接收端保持一致。
 
-## 防火墙设置
+**步骤3：启动发送端**
 
-### Windows防火墙
+运行 `sender.exe`，在 cmd 界面输入客户端 IP 地址和端口。注意，接收端 IP 地址和端口与路由器的 IP 地址和端口保持一致。
 
-如果遇到连接问题，需要允许程序通过防火墙：
+**步骤4：输入文件目录**
 
-**方法1: 通过图形界面**
-1. 打开 "Windows Defender 防火墙"
-2. 点击 "允许应用通过防火墙"
-3. 点击 "更改设置" → "允许其他应用"
-4. 添加 `sender.exe` 和 `receiver.exe`
+在 `sender.exe` 中输入文件的绝对或相对目录（需要包含完整的文件名），回车确认即可开始文件传输。在路由器中可以观察数据包传输情况，包括丢包提示。
 
-**方法2: 通过命令行（管理员权限）**
-```cmd
-netsh advfirewall firewall add rule name="UDP Sender" dir=out action=allow program="C:\path\to\sender.exe" enable=yes
-netsh advfirewall firewall add rule name="UDP Receiver" dir=in action=allow program="C:\path\to\receiver.exe" enable=yes protocol=UDP localport=8888
-```
+**步骤5：更改路由器设置**
+
+`Router.exe` 中可以随时修改模拟路由器的丢包率和延迟大小，修改后点击“修改”键即生效。
 
 ## 支持的文件类型
 
@@ -187,200 +170,71 @@ netsh advfirewall firewall add rule name="UDP Receiver" dir=in action=allow prog
 - 🎵 媒体文件：.mp3, .mp4, .avi, .mkv
 - 📦 压缩文件：.zip, .rar, .7z
 - 💾 可执行文件：.exe, .dll
+......
 
 ## 输出示例
 
-### 发送端输出
+### 发送端/客户端输出
 
 ```
-开始建立连接...
-连接建立成功
-开始发送文件，大小: 1048576 字节
+========== 连接阶段 ==========
+正在建立连接...
+[✓] 已锁定服务器: 127.0.0.1:2
+[✓] 已发送第三次握手ACK
+[✓] 连接建立成功！
 
-传输完成!
-传输时间: 2345 ms
-平均吞吐率: 3.58 Mbps
-总发送字节: 1050240
-总发送包数: 1024
-重传次数: 12
-开始关闭连接...
-连接已关闭
+请输入要传输的文件路径: ./helloworld.txt
+正在等待文件名确认...
+[✓] 收到文件名确认，开始传输数据
+
+========== 数据传输阶段 ==========
+文件大小: 1655808 字节
+
+========== 传输统计 ==========
+[✓] 传输完成！
+──────────────────────────────
+  传输时间:    74202 ms
+  吞吐率:      0.17 Mbps
+  总字节数:    1875098
+  总包数:      1799
+  重传次数:    179
+──────────────────────────────
+
+========== 连接关闭阶段 ==========
+正在关闭连接...
+FIN包超时，进行第1次重传
+[✓] 连接已安全关闭！
+按任意键退出...
 ```
 
-### 接收端输出
+### 接收端/服务端输出
 
 ```
-接收端已启动，监听端口: 8888
-收到SYN，建立连接
-连接已建立
-收到FIN，关闭连接
+══════════ 接收端配置 ══════════
+请输入绑定IP地址: 127.0.0.3
+请输入端口号: 3
 
-接收完成!
-总接收字节: 1048576
-总接收包数: 1024
-连接已关闭
+════════ 接收端已启动 ════════
+监听端口: 3
+等待连接中...
+
+========== 连接建立 ==========
+[✓] 已锁定客户端: 127.0.0.1:2
+[✓] 收到SYN，建立连接
+[✓] 收到第三次握手ACK，连接正式建立！
+
+========== 数据接收 ==========
+[✓] 输出文件已创建: helloworld_output.txt
+[✓] 已发送FILE_NAME确认
+/
+========== 连接关闭 ==========
+[✓] 收到FIN，关闭连接
+[✓] 连接已安全关闭！
+
+════════ 接收完成 ════════
+──────────────────────────────
+  总接收字节:  1655808
+  总接收包数:  1621
+──────────────────────────────
+按任意键退出...
 ```
-
-## 性能测试
-
-### 修改窗口大小测试
-
-编辑 `protocol.h` 中的 `WINDOW_SIZE` 常量：
-
-```cpp
-const uint32_t WINDOW_SIZE = 8;   // 小窗口
-const uint32_t WINDOW_SIZE = 16;  // 默认
-const uint32_t WINDOW_SIZE = 32;  // 大窗口
-```
-
-重新编译后测试不同配置。
-
-### 模拟网络丢包
-
-Windows上可以使用 `clumsy` 工具模拟网络丢包：
-
-1. 下载 clumsy: https://jagt.github.io/clumsy/
-2. 运行 clumsy.exe（需要管理员权限）
-3. 设置过滤规则: `udp and udp.DstPort == 8888`
-4. 启用 "Drop" 功能，设置丢包率（如10%）
-5. 运行测试程序
-
-## 验证文件完整性
-
-使用 Windows 自带的 certutil 命令：
-
-```cmd
-# 计算原文件MD5
-certutil -hashfile input.txt MD5
-
-# 计算接收文件MD5
-certutil -hashfile output.txt MD5
-
-# 两者应该完全相同
-```
-
-或使用PowerShell：
-```powershell
-Get-FileHash input.txt -Algorithm MD5
-Get-FileHash output.txt -Algorithm MD5
-```
-
-## 常见问题
-
-### Q1: 编译错误 "无法打开包括文件: 'winsock2.h'"
-
-**A:** 确保已安装Windows SDK。对于Visual Studio，在安装时勾选 "Windows SDK"。
-
-### Q2: 链接错误 "无法解析的外部符号 WSAStartup"
-
-**A:** 需要链接 ws2_32.lib：
-```cmd
-# Visual Studio
-cl sender.cpp ws2_32.lib
-
-# MinGW
-g++ sender.cpp -lws2_32
-```
-
-### Q3: 运行时错误 "WSAStartup failed"
-
-**A:** Winsock初始化失败，可能是系统网络栈问题。尝试：
-- 重启网络服务
-- 以管理员权限运行
-- 检查防病毒软件是否阻止
-
-### Q4: 绑定端口失败
-
-**A:** 端口可能被占用，检查：
-```cmd
-# 查看端口占用
-netstat -ano | findstr :8888
-
-# 结束占用进程
-taskkill /PID <进程ID> /F
-```
-
-### Q5: 防火墙阻止连接
-
-**A:** 参考上面的"防火墙设置"部分添加规则。
-
-### Q6: 接收文件损坏
-
-**A:** 检查：
-- 确认传输完成（发送端显示"传输完成"）
-- 对比文件大小
-- 使用MD5验证完整性
-- 检查磁盘空间是否充足
-
-## 调试技巧
-
-### 使用 Wireshark 抓包
-
-1. 下载安装 Wireshark
-2. 选择回环接口 (Loopback/Adapter for loopback traffic capture)
-3. 过滤规则: `udp.port == 8888`
-4. 观察数据包交互
-
-### 启用详细日志
-
-在代码中添加调试输出：
-
-```cpp
-#define DEBUG
-#ifdef DEBUG
-    std::cout << "[DEBUG] 发送数据包 seq=" << seq << std::endl;
-#endif
-```
-
-## 性能基准 (Windows 10测试)
-
-| 文件大小 | 窗口大小 | 丢包率 | 传输时间 | 吞吐率 |
-|---------|---------|--------|---------|--------|
-| 1MB | 16 | 0% | ~200ms | ~40 Mbps |
-| 1MB | 16 | 5% | ~320ms | ~25 Mbps |
-| 1MB | 16 | 10% | ~480ms | ~17 Mbps |
-| 10MB | 16 | 0% | ~2.0s | ~40 Mbps |
-| 10MB | 32 | 0% | ~1.6s | ~50 Mbps |
-
-*测试环境: Intel Core i7, 16GB RAM, Windows 10, 本地回环*
-
-## 协议特性
-
-### Windows特定优化
-- 使用 Winsock2 API
-- 非阻塞I/O (`ioctlsocket`)
-- Windows Sleep函数精确延迟
-- 正确处理SOCKET类型和错误码
-
-### 跨平台兼容性
-- 协议头部结构使用 `#pragma pack` 确保对齐
-- 网络字节序处理
-- 可移植的数据类型
-
-## 技术栈
-
-- **语言**: C++11
-- **网络API**: Winsock2 (Windows Socket API)
-- **数据结构**: STL (map, set, vector)
-- **时间管理**: std::chrono
-
-## 项目扩展
-
-可能的改进方向：
-1. 添加GUI界面
-2. 支持多线程传输
-3. 实现断点续传
-4. 添加加密传输
-5. 支持多文件批量传输
-
-## 许可证
-
-本项目仅供学习使用。
-
-## 更新日志
-
-### v1.0 Windows版 (2024-12)
-- Windows Winsock2实现
-- 完整的可靠传输功能
-- SACK和TCP Reno拥塞控制
-- 性能统计和监控
