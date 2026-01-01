@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>个人展示页</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Microsoft YaHei", Arial, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        /* 顶部GIF区域 */
+        .header-section {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .gif-container {
+            display: inline-block;
+            margin-bottom: 0px;
+        }
+
+        .gif-container img {
+            max-width: 250px;
+            width: 100%;
+            height: auto;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        /* 个人信息区域 */
+        .info-section {
+            text-align: center;
+            margin-bottom: 50px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .info-section h1 {
+            font-size: 2.5em;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+
+        .info-section .student-id {
+            font-size: 1.3em;
+            color: #555;
+            margin-bottom: 10px;
+        }
+
+        .info-section .school-info {
+            font-size: 1.1em;
+            color: #777;
+            margin-bottom: 15px;
+        }
+
+        .info-section .github-link {
+            display: inline-block;
+            margin-top: 15px;
+            padding: 10px 25px;
+            color: rgb(84, 83, 83);
+            text-decoration: none;
+            border-radius: 25px;
+            font-size: 1em;
+            transition: all 0.3s ease;
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .info-section .github-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-section .github-link::before {
+            margin-right: 5px;
+        }
+
+        /* 图片窗格布局 */
+        .gallery {
+            display: grid;
+            grid-template-columns: repeat(12, 1fr);
+            grid-auto-rows: 150px;
+            gap: 15px;
+            margin-top: 30px;
+        }
+
+        .gallery-item {
+            overflow: hidden;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.15);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+
+        .gallery-item:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+        }
+
+        .gallery-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+
+        /* 随机窗格布局 */
+        .gallery-item:nth-child(1) {
+            grid-column: span 5;
+            grid-row: span 2;
+        }
+
+        .gallery-item:nth-child(2) {
+            grid-column: span 7;
+            grid-row: span 3;
+        }
+
+        .gallery-item:nth-child(3) {
+            grid-column: span 4;
+            grid-row: span 2;
+        }
+
+        .gallery-item:nth-child(4) {
+            grid-column: span 8;
+            grid-row: span 2;
+        }
+
+        .gallery-item:nth-child(5) {
+            grid-column: span 6;
+            grid-row: span 3;
+        }
+
+        .gallery-item:nth-child(6) {
+            grid-column: span 6;
+            grid-row: span 2;
+        }
+
+        /* 响应式设计 */
+        /* 图片放大预览 */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.85);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 0 50px rgba(255, 255, 255, 0.3);
+            animation: zoomIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        @keyframes zoomIn {
+            from {
+                transform: scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .gif-container img {
+                max-width: 350px;
+            }
+
+            .info-section h1 {
+                font-size: 2em;
+            }
+
+            .gallery {
+                grid-template-columns: repeat(6, 1fr);
+                grid-auto-rows: 120px;
+                gap: 10px;
+            }
+
+            .gallery-item:nth-child(1),
+            .gallery-item:nth-child(2),
+            .gallery-item:nth-child(3),
+            .gallery-item:nth-child(4),
+            .gallery-item:nth-child(5),
+            .gallery-item:nth-child(6) {
+                grid-column: span 3;
+                grid-row: span 2;
+            }
+
+            .modal-content {
+                max-width: 95%;
+                max-height: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头像区域 -->
+        <div class="header-section">
+            <div class="gif-container">
+                <img src="src_gif.webp" alt="动态图片">
+            </div>
+        </div>
+
+        <!-- 个人信息区域 -->
+        <div class="info-section">
+            <h1>陈语童</h1>
+            <p class="student-id">学号：2311887</p>
+            <p class="school-info">南开大学 · 计算机科学与技术</p>
+            <a href="https://github.com/bugp3ssy666" target="_blank" class="github-link">GitHub @bugp3ssy666</a>
+        </div>
+
+        <!-- 图片窗格区域 -->
+        <div class="gallery">
+            <div class="gallery-item">
+                <img src="src_pic-1.jpg" alt="图片1">
+            </div>
+            <div class="gallery-item">
+                <img src="src_pic-2.jpg" alt="图片2">
+            </div>
+            <div class="gallery-item">
+                <img src="src_pic-3.jpg" alt="图片3">
+            </div>
+            <div class="gallery-item">
+                <img src="src_pic-4.jpg" alt="图片4">
+            </div>
+            <div class="gallery-item">
+                <img src="src_pic-5.jpg" alt="图片5">
+            </div>
+            <div class="gallery-item">
+                <img src="src_pic-6.jpg" alt="图片6">
+            </div>
+        </div>
+    </div>
+
+    <!-- 图片放大预览模态框 -->
+    <div class="modal" id="imageModal">
+        <img class="modal-content" id="modalImage" src="" alt="预览图片">
+    </div>
+
+    <script>
+        // 获取模态框元素
+        const modal = document.getElementById('imageModal');
+        const modalImg = document.getElementById('modalImage');
+        const galleryItems = document.querySelectorAll('.gallery-item img');
+
+        // 为每个图片添加点击事件
+        galleryItems.forEach(img => {
+            img.addEventListener('click', function(e) {
+                e.stopPropagation();
+                modal.classList.add('active');
+                modalImg.src = this.src;
+                document.body.style.overflow = 'hidden'; // 禁止页面滚动
+            });
+        });
+
+        // 点击模态框关闭
+        modal.addEventListener('click', function() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; // 恢复页面滚动
+        });
+    </script>
+</body>
+</html>
